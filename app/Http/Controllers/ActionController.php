@@ -55,7 +55,6 @@ class ActionController extends Controller
             return response()->json(['message' => 'Auction not found'], 404);
         }
 
-        // Close expired auction automatically before bidding
         if ($auction->ends_at && Carbon::parse($auction->ends_at)->isPast()) {
             $auction->update(['is_open' => false]);
             $this->checkAndCreateNewAuctions();
@@ -73,14 +72,12 @@ class ActionController extends Controller
             return response()->json(['message' => 'Bid must be higher than current highest bid'], 422);
         }
 
-        // Create bid
         $bid = Bid::create([
             'action_id' => $auction->id,
             'bidder_name' => $request->input('bidder_name'),
             'amount' => $amount,
         ]);
 
-        // Update auction
         $auction->update([
             'highest_bid' => $amount,
             'highest_bidder' => $request->input('bidder_name'),
@@ -114,7 +111,6 @@ class ActionController extends Controller
         ]);
     }
 
-    // Create a single new auction
     private function createNewAuction()
     {
         return Action::create([
@@ -128,10 +124,8 @@ class ActionController extends Controller
         ]);
     }
 
-    // Create multiple new auctions if all are closed
     private function checkAndCreateNewAuctions($count = 2)
     {
-        // If no open auctions left, create new ones
         if (Action::where('is_open', true)->count() === 0) {
             for ($i = 1; $i <= $count; $i++) {
                 $this->createNewAuction();
@@ -147,7 +141,6 @@ class ActionController extends Controller
         $auction->update(['is_open' => false]);
         broadcast(new ActionClosed($auction->id));
 
-        // Automatically create + start next auction
         $next = $this->createNewAuction();
         Log::info('Dispatching ActionStarted event for auction ID: ' . $auction->id);
         broadcast(new ActionStarted($next));

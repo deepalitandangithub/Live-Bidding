@@ -20,7 +20,7 @@ class NewBidNotification extends Notification
 
     public function via($notifiable)
     {
-        return ['database', 'broadcast']; // store in DB + broadcast
+        return ['database', 'broadcast']; 
     }
 
     public function toDatabase($notifiable)

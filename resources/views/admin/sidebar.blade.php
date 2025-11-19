@@ -41,7 +41,6 @@ document.getElementById('notif-link').addEventListener('click', function(e){
     .then(response => response.json())
     .then(data => {
         if(data.success) {
-            // Badge ko 0 set kar do
             document.getElementById('notif-count').textContent = '0';
         }
     })

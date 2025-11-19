@@ -35,7 +35,7 @@ $(document).ready(function() {
             { data: 'amount', name: 'amount' },
             { data: 'created_at', name: 'created_at' }
         ],
-        order: [[3, 'desc']] // latest bid on top
+        order: [[3, 'desc']] 
     });
 });
 </script>

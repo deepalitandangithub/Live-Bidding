@@ -71,17 +71,6 @@
                         </tr>
                     </thead>
                     <tbody id="recentBids"></tbody>
-
-                    <!-- <tbody id="recentBids">
-                        @foreach($auction->bids()->latest()->take(10)->get() as $index => $bid)
-                            <tr>
-                                <td>{{ $index + 1 }}</td>
-                                <td>{{ $bid->bidder_name }}</td>
-                                <td>₹{{ $bid->amount }}</td>
-                                <td>{{ $bid->created_at->format('H:i:s') }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody> -->
                 </table>
             </div>
 
@@ -104,10 +93,9 @@
         let isOpen = {{ $auction->is_open ? 'true' : 'false' }};
         const endsAt = new Date("{{ $auction->ends_at }}");
 
-        // Keep track of unique participants
         let participants = new Set();
 
-        // Setup Pusher + Echo
+        // Setup Pusher
         window.Pusher = Pusher;
         window.Echo = new window.Echo.default({
             broadcaster: 'pusher',
@@ -134,12 +122,12 @@
                 tr.children[0].textContent = index + 1;
             });
 
-            // Add to participants set
+            // Add to participant
             participants.add(bid.bidder_name);
             document.getElementById('participantsCount').textContent = participants.size;
         }
 
-        // Initialize: load latest bids
+        // load latest bids
         function loadInitialBids() {
             axios.get(`/auction/${auctionId}/latest-data`).then(res => {
                 const data = res.data;
@@ -149,20 +137,20 @@
                 const tbody = document.getElementById('recentBids');
                 tbody.innerHTML = '';
 
-                participants = new Set(); // reset participants
+                participants = new Set();
                 data.bids.forEach(bid => addBidRow(bid));
             });
         }
         loadInitialBids();
 
-        // Pusher listener for new bids
+        // Push for new bids
         window.Echo.channel(`auction.${auctionId}`)
             .listen('.NewBidPlaced', e => {
                 document.getElementById('highestBid').textContent = '₹' + parseFloat(e.amount).toFixed(2);
                 document.getElementById('highestBidder').textContent = e.bidder_name || '—';
                 addBidRow(e);
 
-                // Highlight highest bid
+                // highest bid
                 const bidEl = document.getElementById('highestBid');
                 bidEl.classList.add('highlight');
                 setTimeout(() => bidEl.classList.remove('highlight'), 800);
@@ -200,7 +188,7 @@
                 });
         });
 
-        // Countdown Timer
+        // Countdown
         function tick() {
             const diff = endsAt - new Date();
             if (diff <= 0 && isOpen) {
@@ -223,9 +211,8 @@
         }
         tick();
 
-        // Debug Pusher connection
-        Echo.connector.pusher.connection.bind('connected', () => console.log('✅ Pusher connected'));
-        Echo.connector.pusher.connection.bind('error', err => console.log('❌ Pusher error', err));
+        Echo.connector.pusher.connection.bind('connected', () => console.log('Pusher connected'));
+        Echo.connector.pusher.connection.bind('error', err => console.log('Pusher error', err));
     </script>
 
 </body>

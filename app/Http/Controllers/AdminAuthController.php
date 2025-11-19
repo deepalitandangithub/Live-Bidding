@@ -25,7 +25,6 @@ class AdminAuthController extends Controller
 
         $credentials = $request->only('email', 'password');
 
-        // Attempt login with admin guard
         if (Auth::guard('admin')->attempt($credentials)) {
             $request->session()->regenerate();
             return redirect()->route('index');
